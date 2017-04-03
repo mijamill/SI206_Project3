@@ -15,7 +15,7 @@ import json
 import sqlite3
 
 ## Your name: Michael Miller
-## The names of anyone you worked with on this project:
+## The names of anyone you worked with on this project: Jon Bain
 
 #####
 
