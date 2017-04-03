@@ -58,7 +58,7 @@ def get_user_tweets(username):
 		twitter_results = CACHE_DICTION[unique_identifier] # grab the data from the cache!
 	else:
 		print('getting data from internet for', username)
-		twitter_results = api.user_timeline(username)
+		twitter_results = api.user_timeline(username, count = 200, include_rts = 1)
 		if len(twitter_results) >= 20:
 			CACHE_DICTION[unique_identifier] = twitter_results # add it to the dictionary -- new key-val pair
 		# and then write the whole cache dictionary, now with new info added, to the file, so it'll be there even after your program closes!
@@ -192,20 +192,30 @@ joined_result = cur.fetchall()
 ## Task 4 - Manipulating data with comprehensions & libraries
 
 ## Use a set comprehension to get a set of all words (combinations of characters separated by whitespace) among the descriptions in the descriptions_fav_users list. Save the resulting set in a variable called description_words.
-testing = open(test_doc.txt, 'w')
-testing.write(descriptions_fav_users)
-testing.close()
+description_words = []
+for item in descriptions_fav_users:
+	description_words += [word for word in item.split() if word.isalpha()]
+description_words = set(description_words)
 
 
 ## Use a Counter in the collections library to find the most common character among all of the descriptions in the descriptions_fav_users list. Save that most common character in a variable called most_common_char. Break any tie alphabetically (but using a Counter will do a lot of work for you...).
-
-
-
+from collections import	Counter	
+string_of_words = list(description_words)
+str1 = ''.join(string_of_words)
+c = Counter(str1)
+most_common_char = c.most_common(1)
+most_common_char = str([x[0] for x in most_common_char]).strip('[\'\']')
 ## Putting it all together...
 # Write code to create a dictionary whose keys are Twitter screen names and whose associated values are lists of tweet texts that that user posted. You may need to make additional queries to your database! To do this, you can use, and must use at least one of: the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
 # You should save the final dictionary in a variable called twitter_info_diction.
-
-
+from collections import defaultdict
+twitter_info_diction = defaultdict(list)
+statement = 'Select Users.screen_name, Tweets.text from Users Inner Join Tweets on Users.user_id = Tweets.user_posted'
+cur.execute(statement)
+tweets_users = cur.fetchall()
+for i in tweets_users:
+	twitter_info_diction[i[0]].append(i[1])
+twitter_info_diction = dict(twitter_info_diction)
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
 
@@ -305,22 +315,22 @@ class Task3(unittest.TestCase):
 	def test_joined_result(self):
 		self.assertEqual(type(joined_result[0]),type(("hi","bye")),"Testing that an element in joined_result is a tuple")
 
-# class Task4(unittest.TestCase):
-# 	def test_description_words(self):
-# 		print("To help test, description words looks like:", description_words)
-# 		self.assertEqual(type(description_words),type({"hi","Bye"}),"Testing that description words is a set")
-# 	def test_common_char(self):
-# 		self.assertEqual(type(most_common_char),type(""),"Testing that most_common_char is a string")
-# 	def test_common_char2(self):
-# 		self.assertTrue(len(most_common_char)==1,"Testing that most common char is a string of only 1 character")
-# 	def test_twitter_info_diction(self):
-# 		self.assertEqual(type(twitter_info_diction),type({"hi":3}))
-# 	def test_twitter_info_diction2(self):
-# 		self.assertEqual(type(list(twitter_info_diction.keys())[0]),type(""),"Testing that a key of the dictionary is a string")
-# 	def test_twitter_info_diction3(self):
-# 		self.assertEqual(type(list(twitter_info_diction.values())[0]),type([]),"Testing that a value in the dictionary is a list")
-# 	def test_twitter_info_diction4(self):
-# 		self.assertEqual(type(list(twitter_info_diction.values())[0][0]),type(""),"Testing that a single value inside one of those list values-in-dictionary is a string! (See instructions!)")
+class Task4(unittest.TestCase):
+	def test_description_words(self):
+		#print("To help test, description words looks like:", description_words)
+		self.assertEqual(type(description_words),type({"hi","Bye"}),"Testing that description words is a set")
+	def test_common_char(self):
+		self.assertEqual(type(most_common_char),type(""),"Testing that most_common_char is a string")
+	def test_common_char2(self):
+		self.assertTrue(len(most_common_char)==1,"Testing that most common char is a string of only 1 character")
+	def test_twitter_info_diction(self):
+		self.assertEqual(type(twitter_info_diction),type({"hi":3}))
+	def test_twitter_info_diction2(self):
+		self.assertEqual(type(list(twitter_info_diction.keys())[0]),type(""),"Testing that a key of the dictionary is a string")
+	def test_twitter_info_diction3(self):
+		self.assertEqual(type(list(twitter_info_diction.values())[0]),type([]),"Testing that a value in the dictionary is a list")
+	def test_twitter_info_diction4(self):
+		self.assertEqual(type(list(twitter_info_diction.values())[0][0]),type(""),"Testing that a single value inside one of those list values-in-dictionary is a string! (See instructions!)")
 
 
 if __name__ == "__main__":
